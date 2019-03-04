@@ -1,0 +1,70 @@
+#include "stdafx.h"
+#include <opencv2\opencv.hpp>
+#include <opencv2\dnn.hpp>
+#include <iostream>
+
+using namespace std;
+using namespace cv;
+vector<Point2f> Point1, Point2;
+
+Mat A_clone, B_clone;
+int pnumber = 0;
+
+void mouse1_click(int event, int x, int y, int flags, void *ustc) 
+{
+	if (event == CV_EVENT_LBUTTONDOWN)
+	{
+		Point  p = Point(x, y);
+		circle(A_clone, p, 10, Scalar(0, 0, 255), -1);
+		Point1.push_back(p);   
+		cout << "Í¼ÏñA: " << p << endl;
+		pnumber++;
+		cout << "ponit num:" << pnumber << endl;
+	}
+}
+
+void mouse2_click(int event, int x, int y, int flags, void *ustc) 
+{
+	if (event == CV_EVENT_LBUTTONDOWN)
+	{
+		Point  p = Point(x, y);
+		circle(B_clone, p, 10, Scalar(0, 0, 255), -1);
+		Point2.push_back(p);  
+		cout << "Í¼B: " << p << endl;
+	}
+}
+
+int main()
+{
+	Mat Image_A, Image_B, homo,Transform;
+	Image_A = imread("G:\\Í¼ÏñÊÓÆµ´¦Àí\\Í¼ÏñÅä×¼\\Í¼ÏñÅä×¼\\Image A.jpg");  
+	Image_B = imread("G:\\Í¼ÏñÊÓÆµ´¦Àí\\Í¼ÏñÅä×¼\\Í¼ÏñÅä×¼\\Image B.jpg");  
+
+
+	A_clone = Image_A.clone();
+	B_clone = Image_B.clone();
+
+	namedWindow("A",0);
+	namedWindow("B",0);
+	imshow("A", A_clone);
+	imshow("B", B_clone);
+	setMouseCallback("A", mouse1_click);
+	setMouseCallback("B", mouse2_click);
+
+	waitKey();
+
+	homo = findHomography(Point2, Point1, CV_RANSAC);
+	cout << "H¾ØÕó"<<homo;
+	warpPerspective(Image_B, Transform, homo, Size(Image_A.cols, Image_A.rows)); 
+
+	namedWindow("AÍ¼´òµã", 0);
+	namedWindow("BÍ¼´òµã", 0);
+	namedWindow("±ä»»Í¼", 0);
+	imshow("AÍ¼´òµã", A_clone);
+	imshow("BÍ¼´òµã", B_clone);
+	imshow("±ä»»Í¼", Transform);
+
+
+	waitKey();
+	return 0;
+}
